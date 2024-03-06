@@ -1,0 +1,9 @@
+# main
+.vscode/
+
+# data
+data/test/
+!data/test/.gitkeep
+
+data/train/
+!data/train/.gitkeep
