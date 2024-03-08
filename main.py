@@ -1,10 +1,13 @@
 import json
 
 from torchvision import datasets, transforms
-from torch.utils.data import DataLoader  # , Subset
+from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 from torch import optim
 import torch
+
+from models import TinyModel, SimpleCNN
+
 
 with open("data_mean_std.json", "r", -1, "utf-8") as f:
     data_desc = json.loads("".join(f.readlines()))
@@ -23,48 +26,14 @@ transform = transforms.Compose([
         ),
 ])
 
-print("Loading data...")
-dataset = datasets.ImageFolder(root="data/train_small", transform=transform)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("Device:", device)
+print()
+
+dataset = datasets.ImageFolder(root="data/train", transform=transform)
 dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
 
-
-# selected_classes = ["airplane", "dog"]
-# indices = [
-#     i
-#     for i, (_, label) in enumerate(dataset)
-#     if dataset.classes[label] in selected_classes
-#     ]
-
-# dataset = Subset(dataset, indices)
-# dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-
 classes_number = len(dataset.classes)
-
-
-class TinyModel(torch.nn.Module):
-    def __init__(
-            self,
-            input_size: int,
-            first_hidden_size: int,
-            second_hidden_size: int,
-            output_size: int
-            ) -> None:
-
-        super(TinyModel, self).__init__()
-
-        self.linear1 = torch.nn.Linear(input_size, first_hidden_size)
-        self.activation1 = torch.nn.ReLU()
-        self.linear2 = torch.nn.Linear(first_hidden_size, second_hidden_size)
-        self.activation2 = torch.nn.ReLU()
-        self.linear3 = torch.nn.Linear(second_hidden_size, output_size)
-
-    def forward(self, x):
-        x = self.linear1(x)
-        x = self.activation1(x)
-        x = self.linear2(x)
-        x = self.activation2(x)
-        x = self.linear3(x)
-        return x
 
 
 def plot_images(images, labels, dataset):
@@ -82,41 +51,70 @@ def plot_images(images, labels, dataset):
     plt.show()
 
 
-model = TinyModel(IMAGE_SIZE*IMAGE_SIZE*3, 2000, 500, classes_number)
-
-criterion = torch.nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.00001)
+available_models = (
+    TinyModel,
+    SimpleCNN
+)
 
 epochs = 10
 
-model.train()
 
-first = True
+for model in available_models:
+    print("-----", model.name, "-----")
+    model = model(num_classes=classes_number).to(device)
 
+    criterion = torch.nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.00001)
 
-print("Start training...")
-for epoch in range(epochs):
-    for images, labels in dataloader:
-        images = images.view(-1, IMAGE_SIZE*IMAGE_SIZE*3)
+    model.train()
 
-        optimizer.zero_grad()
+    for epoch in range(epochs):
+        epoch_losses = []
+        for images, labels in dataloader:
+            images, labels = images.to(device), labels.to(device)
+            if model.name == "TinyModel":
+                images = images.view(-1, IMAGE_SIZE*IMAGE_SIZE*3)
 
-        outputs = model(images)
+            optimizer.zero_grad()
 
-        if first:
-            print(images.shape, labels.shape)
-            print(outputs.shape)
-            print()
-            first = False
+            outputs = model(images)
+            
+            # print("L:", [int(el) for el in labels])
+            # print("O:", [int(el.argmax(dim=0)) for el in outputs])
+            # print("O:", outputs)
 
-        # print("L:", [int(el) for el in labels])
-        # print("O:", [int(el.argmax(dim=0)) for el in outputs])
-        # print("O:", outputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
 
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
+            epoch_losses.append(loss.item())
 
-    print(f"Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}")
+        avg_loss = sum(epoch_losses)/len(epoch_losses)
+        print(f"Epoch [{epoch+1}/{epochs}], Loss: {avg_loss:.4f}")
 
-print("Training is done.")
+    test_dataset = datasets.ImageFolder(root="data/test", transform=transform)
+    test_dataloader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+
+    model.eval()
+    test_loss = 0
+    correct = 0
+    total = 0
+
+    with torch.no_grad():
+        for images, labels in test_dataloader:
+            images, labels = images.to(device), labels.to(device)
+            if model.name == "TinyModel":
+                images = images.view(-1, IMAGE_SIZE*IMAGE_SIZE*3)
+
+            outputs = model(images)
+
+            loss = criterion(outputs, labels)
+            test_loss += loss.item()
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+    avg_loss = test_loss / len(test_dataloader.dataset)
+    accuracy = 100 * correct / total
+
+    print(f"Test Loss: {avg_loss:.4f}, Accuracy: {accuracy:.2f}%")
