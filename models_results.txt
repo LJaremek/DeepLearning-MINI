@@ -1,26 +1,52 @@
 Device: cuda
 
 ----- SimpleCNN -----
-Epoch [1/10], Loss: 0.8313
-Epoch [2/10], Loss: 0.6527
-Epoch [3/10], Loss: 0.5980
-Epoch [4/10], Loss: 0.5648
-Epoch [5/10], Loss: 0.5410
-Epoch [6/10], Loss: 0.5240
-Epoch [7/10], Loss: 0.5088
-Epoch [8/10], Loss: 0.4969
-Epoch [9/10], Loss: 0.4877
-Epoch [10/10], Loss: 0.4785
-Test Loss: 0.0077, Accuracy: 80.26%
+PARAMS:
+        Learning rate: 1e-05
+        Batch size: 64
+Epoch [1/20], Loss: 0.8171
+Epoch [2/20], Loss: 0.6403
+Epoch [3/20], Loss: 0.5863
+Epoch [4/20], Loss: 0.5566
+Epoch [5/20], Loss: 0.5338
+Epoch [6/20], Loss: 0.5181
+Epoch [7/20], Loss: 0.5049
+Epoch [8/20], Loss: 0.4926
+Epoch [9/20], Loss: 0.4836
+Epoch [10/20], Loss: 0.4745
+Epoch [11/20], Loss: 0.4669
+Epoch [12/20], Loss: 0.4587
+Epoch [13/20], Loss: 0.4518
+Epoch [14/20], Loss: 0.4470
+Epoch [15/20], Loss: 0.4397
+Epoch [16/20], Loss: 0.4343
+Epoch [17/20], Loss: 0.4292
+Epoch [18/20], Loss: 0.4236
+Epoch [19/20], Loss: 0.4176
+Epoch [20/20], Loss: 0.4138
+Test Loss: 0.0069, Accuracy: 82.67%
 ----- AdvancedCNN -----
-Epoch [1/10], Loss: 0.7082
-Epoch [2/10], Loss: 0.4870
-Epoch [3/10], Loss: 0.4213
-Epoch [4/10], Loss: 0.3801
-Epoch [5/10], Loss: 0.3467
-Epoch [6/10], Loss: 0.3155
-Epoch [7/10], Loss: 0.2843
-Epoch [8/10], Loss: 0.2540
-Epoch [9/10], Loss: 0.2278
-Epoch [10/10], Loss: 0.2000
-Test Loss: 0.0054, Accuracy: 87.55%
+PARAMS:
+        Learning rate: 1e-05
+        Batch size: 64
+Epoch [1/20], Loss: 0.7176
+Epoch [2/20], Loss: 0.4934
+Epoch [3/20], Loss: 0.4264
+Epoch [4/20], Loss: 0.3833
+Epoch [5/20], Loss: 0.3473
+Epoch [6/20], Loss: 0.3164
+Epoch [7/20], Loss: 0.2914
+Epoch [8/20], Loss: 0.2614
+Epoch [9/20], Loss: 0.2381
+Epoch [10/20], Loss: 0.2130
+Epoch [11/20], Loss: 0.1855
+Epoch [12/20], Loss: 0.1625
+Epoch [13/20], Loss: 0.1350
+Epoch [14/20], Loss: 0.1220
+Epoch [15/20], Loss: 0.0998
+Epoch [16/20], Loss: 0.0821
+Epoch [17/20], Loss: 0.0660
+Epoch [18/20], Loss: 0.0546
+Epoch [19/20], Loss: 0.0463
+Epoch [20/20], Loss: 0.0402
+Test Loss: 0.0076, Accuracy: 87.53%
