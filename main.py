@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from torch import optim
 import torch
 
-from models import TinyModel, SimpleCNN
+from models import SimpleCNN, AdvancedCNN
 
 
 with open("data_mean_std.json", "r", -1, "utf-8") as f:
@@ -33,6 +33,8 @@ print()
 dataset = datasets.ImageFolder(root="data/train", transform=transform)
 dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
 
+print(dataset.shape)
+
 classes_number = len(dataset.classes)
 
 
@@ -52,11 +54,11 @@ def plot_images(images, labels, dataset):
 
 
 available_models = (
-    TinyModel,
-    SimpleCNN
+    SimpleCNN,
+    AdvancedCNN
 )
 
-epochs = 10
+EPOCHS = 10
 
 
 for model in available_models:
@@ -68,17 +70,15 @@ for model in available_models:
 
     model.train()
 
-    for epoch in range(epochs):
+    for epoch in range(EPOCHS):
         epoch_losses = []
         for images, labels in dataloader:
             images, labels = images.to(device), labels.to(device)
-            if model.name == "TinyModel":
-                images = images.view(-1, IMAGE_SIZE*IMAGE_SIZE*3)
 
             optimizer.zero_grad()
 
             outputs = model(images)
-            
+
             # print("L:", [int(el) for el in labels])
             # print("O:", [int(el.argmax(dim=0)) for el in outputs])
             # print("O:", outputs)
@@ -90,7 +90,7 @@ for model in available_models:
             epoch_losses.append(loss.item())
 
         avg_loss = sum(epoch_losses)/len(epoch_losses)
-        print(f"Epoch [{epoch+1}/{epochs}], Loss: {avg_loss:.4f}")
+        print(f"Epoch [{epoch+1}/{EPOCHS}], Loss: {avg_loss:.4f}")
 
     test_dataset = datasets.ImageFolder(root="data/test", transform=transform)
     test_dataloader = DataLoader(test_dataset, batch_size=64, shuffle=False)
@@ -103,8 +103,6 @@ for model in available_models:
     with torch.no_grad():
         for images, labels in test_dataloader:
             images, labels = images.to(device), labels.to(device)
-            if model.name == "TinyModel":
-                images = images.view(-1, IMAGE_SIZE*IMAGE_SIZE*3)
 
             outputs = model(images)
 

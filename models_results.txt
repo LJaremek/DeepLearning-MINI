@@ -1,26 +1,26 @@
 Device: cuda
 
------ TinyModel -----
-Epoch [1/10], Loss: 0.7344
-Epoch [2/10], Loss: 0.6037
-Epoch [3/10], Loss: 0.5373
-Epoch [4/10], Loss: 0.4784
-Epoch [5/10], Loss: 0.4229
-Epoch [6/10], Loss: 0.3623
-Epoch [7/10], Loss: 0.3100
-Epoch [8/10], Loss: 0.2551
-Epoch [9/10], Loss: 0.2112
-Epoch [10/10], Loss: 0.1699
-Test Loss: 0.0104, Accuracy: 77.97%
 ----- SimpleCNN -----
-Epoch [1/10], Loss: 0.8362
-Epoch [2/10], Loss: 0.6492
-Epoch [3/10], Loss: 0.5855
-Epoch [4/10], Loss: 0.5518
-Epoch [5/10], Loss: 0.5288
-Epoch [6/10], Loss: 0.5127
-Epoch [7/10], Loss: 0.5004
-Epoch [8/10], Loss: 0.4883
-Epoch [9/10], Loss: 0.4798
-Epoch [10/10], Loss: 0.4716
-Test Loss: 0.0077, Accuracy: 80.29%
+Epoch [1/10], Loss: 0.8313
+Epoch [2/10], Loss: 0.6527
+Epoch [3/10], Loss: 0.5980
+Epoch [4/10], Loss: 0.5648
+Epoch [5/10], Loss: 0.5410
+Epoch [6/10], Loss: 0.5240
+Epoch [7/10], Loss: 0.5088
+Epoch [8/10], Loss: 0.4969
+Epoch [9/10], Loss: 0.4877
+Epoch [10/10], Loss: 0.4785
+Test Loss: 0.0077, Accuracy: 80.26%
+----- AdvancedCNN -----
+Epoch [1/10], Loss: 0.7082
+Epoch [2/10], Loss: 0.4870
+Epoch [3/10], Loss: 0.4213
+Epoch [4/10], Loss: 0.3801
+Epoch [5/10], Loss: 0.3467
+Epoch [6/10], Loss: 0.3155
+Epoch [7/10], Loss: 0.2843
+Epoch [8/10], Loss: 0.2540
+Epoch [9/10], Loss: 0.2278
+Epoch [10/10], Loss: 0.2000
+Test Loss: 0.0054, Accuracy: 87.55%
