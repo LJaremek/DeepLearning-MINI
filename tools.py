@@ -6,6 +6,8 @@ import torch.nn as nn
 import numpy as np
 import torch
 
+from collections import deque
+
 
 def calc_data_mean_std(
         root_path: str
@@ -76,12 +78,14 @@ def train_model(
         epochs: int,
         criterion,
         optimizer: optim.Optimizer,
-        printing: bool = True
-        ) -> None:
+        printing: bool = True,
+        limit_epochs: bool = True
+        ) -> int:
 
     model.train()
 
-    last_test_loss = float("inf")
+    last_test_loss = deque(maxlen=3)
+    last_test_loss.append(float("inf"))
 
     for epoch in range(1, epochs+1):
         epoch_losses = []
@@ -102,18 +106,21 @@ def train_model(
 
             epoch_losses.append(loss.item())
 
+        avg_loss = sum(epoch_losses)/len(epoch_losses)
+
+        test_loss, _ = valid_model(
+            device, model, test_dataloader, criterion, False
+            )
+
         if printing:
-            avg_loss = sum(epoch_losses)/len(epoch_losses)
-
-            test_loss, _ = valid_model(
-                device, model, test_dataloader, criterion, False
-                )
-
             print_epoch_status(epoch, epochs, avg_loss, test_loss)
 
-            if test_loss > last_test_loss:
-                return
-            last_test_loss = test_loss
+        if limit_epochs:
+            if test_loss > max(last_test_loss):
+                return epoch
+            last_test_loss.append(test_loss)
+
+    return epoch
 
 
 def valid_model(
@@ -161,8 +168,9 @@ def run_model(
         epochs: int,
         criterion,
         optimizer: optim.Optimizer,
-        printing: bool = True
-        ) -> float:
+        printing: bool = True,
+        limit_epochs: bool = True
+        ) -> tuple[float, float]:
 
     train_dataset = datasets.ImageFolder(train_path, transform=transform)
     train_dataloader = DataLoader(
@@ -174,7 +182,7 @@ def run_model(
         test_dataset, batch_size=batch_size, shuffle=False
         )
 
-    train_model(
+    real_epochs = train_model(
         device,
         model,
         train_dataloader,
@@ -182,7 +190,8 @@ def run_model(
         epochs,
         criterion,
         optimizer,
-        printing
+        printing,
+        limit_epochs
         )
 
     acc = valid_model(
@@ -193,4 +202,4 @@ def run_model(
         printing
     )
 
-    return acc
+    return acc, real_epochs

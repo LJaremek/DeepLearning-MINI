@@ -98,6 +98,7 @@ for (
     print(f"\tLearning rate: {learning_rate}")
     print(f"\tBatch size: {batch_size}")
     print(f"\tTransformations name: {transform_name}")
+
     model = model(num_classes=classes_number).to(device)
 
     transform = transform_list[transform_name]
@@ -109,7 +110,7 @@ for (
         weight_decay=weight_decay
         )
 
-    acc = run_model(
+    acc, real_epochs = run_model(
         device,
         model,
         transform,
@@ -118,12 +119,12 @@ for (
         batch_size,
         epoch_num,
         criterion,
-        optimizer
+        optimizer,
     )
 
     with open("results.csv", "a", -1, "utf-8") as file:
         row = f"{model.name};Adam;{learning_rate};{batch_size};"
-        row += f"{transform_name};{epoch_num}"
+        row += f"{transform_name};{real_epochs}"
         print(row, file=file)
 
     print()
