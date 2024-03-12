@@ -17,16 +17,29 @@ data_std = data_desc["std"]
 
 IMAGE_SIZE = 32
 
-transform_list = (
-    transforms.Compose([
-        transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
-        transforms.ToTensor(),
-        transforms.Normalize(
-            mean=data_mean,
-            std=data_std
-            )
-    ]),
-)
+transform_list = {
+    "small":
+        transforms.Compose([
+            transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean=data_mean,
+                std=data_std
+                )
+        ]),
+    "big":
+        transforms.Compose([
+            transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomCrop(IMAGE_SIZE, padding=4),
+            transforms.RandomRotation(15),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=data_mean, std=data_std),
+            transforms.RandomErasing(
+                p=0.5, scale=(0.02, 0.33), ratio=(0.3, 3.3), value="random"
+                )
+        ])
+}
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Device:", device)
@@ -57,12 +70,15 @@ products = product(
     transform_list
 )
 
-for model, learning_rate, batch_size, transform in products:
+for model, learning_rate, batch_size, transform_name in products:
     print("-----", model.name, "-----")
     print("PARAMS:")
     print(f"\tLearning rate: {learning_rate}")
     print(f"\tBatch size: {batch_size}")
+    print(f"\tTransformations name: {transform_name}")
     model = model(num_classes=classes_number).to(device)
+
+    transform = transform_list[transform_name]
 
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)

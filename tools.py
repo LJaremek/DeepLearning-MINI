@@ -58,26 +58,34 @@ def plot_images(images, labels, dataset, image_size: tuple[int, int]) -> None:
     plt.show()
 
 
+def print_epoch_status(
+        epoch: int, epochs: int,
+        train_loss: float, test_loss: float
+        ) -> None:
+    msg = f"Epoch [{epoch:2}/{epochs}], "
+    msg += f"Train Loss: {train_loss:.3f}, "
+    msg += f"Test Loss: {test_loss:.3f}"
+    print(msg)
+
+
 def train_model(
         device: torch.device,
         model: nn.Module,
-        transform: transforms.Compose,
-        data_path: str,
-        batch_size: int,
+        train_dataloader,
+        test_dataloader,
         epochs: int,
         criterion,
         optimizer: optim.Optimizer,
         printing: bool = True
         ) -> None:
 
-    dataset = datasets.ImageFolder(root=data_path, transform=transform)
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-
     model.train()
 
-    for epoch in range(epochs):
+    last_test_loss = float("inf")
+
+    for epoch in range(1, epochs+1):
         epoch_losses = []
-        for images, labels in dataloader:
+        for images, labels in train_dataloader:
             images, labels = images.to(device), labels.to(device)
 
             optimizer.zero_grad()
@@ -94,27 +102,31 @@ def train_model(
 
             epoch_losses.append(loss.item())
 
-        avg_loss = sum(epoch_losses)/len(epoch_losses)
         if printing:
-            print(f"Epoch [{epoch+1}/{epochs}], Loss: {avg_loss:.4f}")
+            avg_loss = sum(epoch_losses)/len(epoch_losses)
+
+            test_loss, _ = valid_model(
+                device, model, test_dataloader, criterion, False
+                )
+
+            print_epoch_status(epoch, epochs, avg_loss, test_loss)
+
+            if test_loss > last_test_loss:
+                return
+            last_test_loss = test_loss
 
 
 def valid_model(
         device: torch.device,
         model: nn.Module,
-        transform: transforms.Compose,
-        data_path: str,
-        batch_size: int,
+        dataloader,
         criterion,
         printing: bool = True
-        ) -> None:
+        ) -> tuple[float, float]:
 
     test_loss = 0
     correct = 0
     total = 0
-
-    dataset = datasets.ImageFolder(data_path, transform=transform)
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
 
     model.eval()
 
@@ -136,6 +148,8 @@ def valid_model(
     if printing:
         print(f"Test Loss: {avg_loss:.4f}, Accuracy: {accuracy:.2f}%")
 
+    return avg_loss, accuracy
+
 
 def run_model(
         device: torch.device,
@@ -150,12 +164,21 @@ def run_model(
         printing: bool = True
         ) -> None:
 
+    train_dataset = datasets.ImageFolder(train_path, transform=transform)
+    train_dataloader = DataLoader(
+        train_dataset, batch_size=batch_size, shuffle=True
+        )
+
+    test_dataset = datasets.ImageFolder(test_path, transform=transform)
+    test_dataloader = DataLoader(
+        test_dataset, batch_size=batch_size, shuffle=False
+        )
+
     train_model(
         device,
         model,
-        transform,
-        train_path,
-        batch_size,
+        train_dataloader,
+        test_dataloader,
         epochs,
         criterion,
         optimizer,
@@ -165,9 +188,9 @@ def run_model(
     valid_model(
         device,
         model,
-        transform,
-        test_path,
-        batch_size,
+        test_dataloader,
         criterion,
         printing
     )
+
+    print()
