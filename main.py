@@ -6,26 +6,25 @@ from torch import optim
 import torch
 
 from models import SimpleCNN, AdvancedCNN
-from tools import run_model
+from tools import run_model, calc_data_mean_std
 
 
-with open("data_mean_std.json", "r", -1, "utf-8") as f:
-    data_desc = json.loads("".join(f.readlines()))
+IMAGE_SIZE = 32
+
+try:
+    with open("data_mean_std.json", "r", -1, "utf-8") as f:
+        data_desc = json.loads("".join(f.readlines()))
+except FileNotFoundError:
+    data_desc = calc_data_mean_std("data")
 
 data_mean = data_desc["mean"]
 data_std = data_desc["std"]
-
-IMAGE_SIZE = 32
 
 transform_list = {
     "small":
         transforms.Compose([
             transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
-            transforms.ToTensor(),
-            transforms.Normalize(
-                mean=data_mean,
-                std=data_std
-                )
+            transforms.ToTensor()
         ]),
     "big":
         transforms.Compose([
@@ -54,23 +53,46 @@ available_models = (
 )
 
 learning_rates = (
+    0.0001,
     0.00001,
+    0.000001
 )
 
 batch_sizes = (
+    32,
     64,
+    128,
 )
 
-EPOCHS = 20
+epochs = (
+    10,
+    30,
+    50
+)
+
+weight_decay_list = (
+    0,  # default
+    0.001,
+    0.00001
+)
 
 products = product(
     available_models,
     learning_rates,
     batch_sizes,
-    transform_list
+    transform_list,
+    epochs,
+    weight_decay_list
 )
 
-for model, learning_rate, batch_size, transform_name in products:
+with open("results.csv", "w", -1, "utf-8") as file:
+    print("model;optim;lr;batch_size;trans;epochs;", file=file)
+
+for (
+        model, learning_rate, batch_size,
+        transform_name, epoch_num, weight_decay
+        ) in products:
+
     print("-----", model.name, "-----")
     print("PARAMS:")
     print(f"\tLearning rate: {learning_rate}")
@@ -81,16 +103,27 @@ for model, learning_rate, batch_size, transform_name in products:
     transform = transform_list[transform_name]
 
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = optim.Adam(
+        model.parameters(),
+        lr=learning_rate,
+        weight_decay=weight_decay
+        )
 
-    run_model(
+    acc = run_model(
         device,
         model,
         transform,
         "data/train",
         "data/test",
         batch_size,
-        EPOCHS,
+        epoch_num,
         criterion,
         optimizer
     )
+
+    with open("results.csv", "a", -1, "utf-8") as file:
+        row = f"{model.name};Adam;{learning_rate};{batch_size};"
+        row += f"{transform_name};{epoch_num}"
+        print(row, file=file)
+
+    print()

@@ -1,5 +1,6 @@
 # main
 .vscode/
+__pycache__/
 
 # data
 data/test/

@@ -162,7 +162,7 @@ def run_model(
         criterion,
         optimizer: optim.Optimizer,
         printing: bool = True
-        ) -> None:
+        ) -> float:
 
     train_dataset = datasets.ImageFolder(train_path, transform=transform)
     train_dataloader = DataLoader(
@@ -185,7 +185,7 @@ def run_model(
         printing
         )
 
-    valid_model(
+    acc = valid_model(
         device,
         model,
         test_dataloader,
@@ -193,4 +193,4 @@ def run_model(
         printing
     )
 
-    print()
+    return acc
