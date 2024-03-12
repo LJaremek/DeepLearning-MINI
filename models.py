@@ -1,11 +1,12 @@
 import torch.nn.functional as F
 import torch.nn as nn
+import torch
 
 
 class SimpleCNN(nn.Module):
     name = "SimpleCNN"
 
-    def __init__(self, num_classes=10):
+    def __init__(self, num_classes: int = 10) -> None:
         super(SimpleCNN, self).__init__()
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
@@ -13,7 +14,8 @@ class SimpleCNN(nn.Module):
         self.fc1 = nn.Linear(64 * 8 * 8, 512)
         self.fc2 = nn.Linear(512, num_classes)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        print(1, type(x))
         a = self.conv1(x)
         b = F.relu(a)
         x = self.pool(b)
@@ -21,13 +23,19 @@ class SimpleCNN(nn.Module):
         x = x.view(-1, 64 * 8 * 8)
         x = F.relu(self.fc1(x))
         x = self.fc2(x)
+        print(2, type(x))
         return x
 
 
 class AdvancedCNN(nn.Module):
     name = "AdvancedCNN"
 
-    def __init__(self, num_classes=10, dropout_rate=0.5):
+    def __init__(
+            self,
+            num_classes: int = 10,
+            dropout_rate: float = 0.5
+            ) -> None:
+
         super(AdvancedCNN, self).__init__()
         # First block
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1)
@@ -57,7 +65,7 @@ class AdvancedCNN(nn.Module):
         self.dropout2 = nn.Dropout(dropout_rate)
         self.fc3 = nn.Linear(512, num_classes)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.pool1(
             F.relu(self.bn2(self.conv2(F.relu(self.bn1(self.conv1(x))))))
             )
