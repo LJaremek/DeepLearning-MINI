@@ -69,8 +69,26 @@ optimizer = optim.Adam(
     )
 
 temperature = 2
-
 percent_of_teacher = 0.5
+
+def evaluate_model_mid_training(loader, model, device):
+    model.eval()  # Przełączenie modelu w tryb ewaluacji
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for images, labels in tqdm(loader, desc="Evaluation", unit="batch"):
+            images, labels = images.to(device), labels.to(device)
+
+            outputs = model(images)
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+    accuracy = 100 * correct / total
+    model.train() # Powrót do trenowania
+    return accuracy
+
+
 print("Started training")
 for epoch in range(0, epochs):
     running_loss = 0.0
@@ -102,6 +120,8 @@ for epoch in range(0, epochs):
             running_loss += loss.item()
             tepoch.set_postfix(loss=running_loss/len(train_loader))
 
+        accuracy = evaluate_model_mid_training(test_loader, student_model, device)
+        print(f"Epoch {epoch+1}/{epochs}, Accuracy: {accuracy:.2f}%")
         torch.save(student_model.state_dict(), f"student_model_epoch_{epoch+1}.pth")
 
 # Evaluation
