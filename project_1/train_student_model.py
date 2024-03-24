@@ -1,4 +1,5 @@
 import json
+import os
 
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
@@ -44,7 +45,7 @@ classes = len(train_dataset.classes)
 
 # Model initialization
 teacher_model = EfficientNetB0(num_classes=classes).to(device)
-teacher_path = "project_1\\models_status\\10c_model_epoch_7.pth"
+teacher_path = "models_status\\10c_model_epoch_7.pth"
 teacher_model.load_state_dict(
     torch.load(teacher_path, map_location=device)
     )
