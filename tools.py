@@ -1,12 +1,9 @@
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
-from torch import optim
-import torch.nn as nn
+from tqdm import tqdm
 import numpy as np
 import torch
-
-from collections import deque
 
 
 def calc_data_mean_std(
@@ -60,146 +57,19 @@ def plot_images(images, labels, dataset, image_size: tuple[int, int]) -> None:
     plt.show()
 
 
-def print_epoch_status(
-        epoch: int, epochs: int,
-        train_loss: float, test_loss: float
-        ) -> None:
-    msg = f"Epoch [{epoch:2}/{epochs}], "
-    msg += f"Train Loss: {train_loss:.3f}, "
-    msg += f"Test Loss: {test_loss:.3f}"
-    print(msg)
-
-
-def train_model(
-        device: torch.device,
-        model: nn.Module,
-        train_dataloader,
-        test_dataloader,
-        epochs: int,
-        criterion,
-        optimizer: optim.Optimizer,
-        printing: bool = True,
-        limit_epochs: bool = True
-        ) -> int:
-
-    model.train()
-
-    last_test_loss = deque(maxlen=3)
-    last_test_loss.append(float("inf"))
-
-    for epoch in range(1, epochs+1):
-        epoch_losses = []
-        for images, labels in train_dataloader:
-            images, labels = images.to(device), labels.to(device)
-
-            optimizer.zero_grad()
-
-            outputs = model(images)
-
-            # print("L:", [int(el) for el in labels])
-            # print("O:", [int(el.argmax(dim=0)) for el in outputs])
-            # print("O:", outputs)
-
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
-
-            epoch_losses.append(loss.item())
-
-        avg_loss = sum(epoch_losses)/len(epoch_losses)
-
-        test_loss, _ = valid_model(
-            device, model, test_dataloader, criterion, False
-            )
-
-        if printing:
-            print_epoch_status(epoch, epochs, avg_loss, test_loss)
-
-        if limit_epochs:
-            if test_loss > max(last_test_loss):
-                return epoch
-            last_test_loss.append(test_loss)
-
-    return epoch
-
-
-def valid_model(
-        device: torch.device,
-        model: nn.Module,
-        dataloader,
-        criterion,
-        printing: bool = True
-        ) -> tuple[float, float]:
-
-    test_loss = 0
+def evaluate_model(model, loader, device: str) -> float:
+    model.eval()
     correct = 0
     total = 0
 
-    model.eval()
-
     with torch.no_grad():
-        for images, labels in dataloader:
+        for images, labels in tqdm(loader, desc="Evaluation", unit="batch"):
             images, labels = images.to(device), labels.to(device)
 
             outputs = model(images)
-
-            loss = criterion(outputs, labels)
-            test_loss += loss.item()
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-    avg_loss = test_loss / len(dataloader.dataset)
     accuracy = 100 * correct / total
-
-    if printing:
-        print(f"Test Loss: {avg_loss:.4f}, Accuracy: {accuracy:.2f}%")
-
-    return avg_loss, accuracy
-
-
-def run_model(
-        device: torch.device,
-        model: nn.Module,
-        transform: transforms.Compose,
-        train_path: str,
-        test_path: str,
-        batch_size: int,
-        epochs: int,
-        criterion,
-        optimizer: optim.Optimizer,
-        printing: bool = True,
-        limit_epochs: bool = True
-        ) -> tuple[float, float]:
-
-    train_dataset = datasets.ImageFolder(train_path, transform=transform)
-    train_dataloader = DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=True
-        )
-
-    test_dataset = datasets.ImageFolder(test_path, transform=transform)
-    test_dataloader = DataLoader(
-        test_dataset, batch_size=batch_size, shuffle=False
-        )
-
-    real_epochs = train_model(
-        device,
-        model,
-        train_dataloader,
-        test_dataloader,
-        epochs,
-        criterion,
-        optimizer,
-        printing,
-        limit_epochs
-        )
-
-    acc = valid_model(
-        device,
-        model,
-        test_dataloader,
-        criterion,
-        printing
-    )
-
-    return acc, real_epochs
+    return accuracy
