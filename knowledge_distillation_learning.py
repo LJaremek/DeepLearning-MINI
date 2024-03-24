@@ -72,36 +72,36 @@ temperature = 2
 
 percent_of_teacher = 0.5
 print("Started training")
-for epoch in range(1, epochs+1):
+for epoch in range(0, epochs):
     running_loss = 0.0
-    epoch_losses = []
-    for images, labels in train_loader:
-        images, labels = images.to(device), labels.to(device)
+    with tqdm(train_loader, unit="batch") as tepoch:
+        tepoch.set_description(f"Epoch {epoch+1}")
+        for images, labels in tepoch:
+            optimizer.zero_grad()
+            images, labels = images.to(device), labels.to(device)
+            student_logits = student_model(images)
 
-        optimizer.zero_grad()
+            with torch.no_grad():
+                teacher_logits = teacher_model(images)
+            
+            # Soften the student logits by applying softmax first and log() second
+            soft_targets = nn.functional.softmax(teacher_logits / temperature, dim=-1)
+            soft_prob = nn.functional.log_softmax(student_logits / temperature, dim=-1)
+            outputs = student_model(images)
+            # Calculate the soft targets loss. Scaled by temperature**2 as suggested by the authors of the paper "Distilling the knowledge in a neural network"
+            soft_targets_loss = torch.sum(soft_targets * (soft_targets.log() - soft_prob)) / soft_prob.size()[0] * (temperature**2)
 
-        student_logits = student_model(images)
+            # Calculate the true label loss
+            label_loss = ce_loss(student_logits, labels)
+            # Weighted sum of the two losses
+            loss = percent_of_teacher * soft_targets_loss + (1-percent_of_teacher) * label_loss
 
-        with torch.no_grad():
-            teacher_logits = teacher_model(images)
-        
+            loss.backward()
+            optimizer.step()
 
-        # Soften the student logits by applying softmax first and log() second
-        soft_targets = nn.functional.softmax(teacher_logits / temperature, dim=-1)
-        soft_prob = nn.functional.log_softmax(student_logits / temperature, dim=-1)
-        outputs = student_model(images)
-        # Calculate the soft targets loss. Scaled by temperature**2 as suggested by the authors of the paper "Distilling the knowledge in a neural network"
-        soft_targets_loss = torch.sum(soft_targets * (soft_targets.log() - soft_prob)) / soft_prob.size()[0] * (temperature**2)
+            running_loss += loss.item()
+            tepoch.set_postfix(loss=running_loss/len(train_loader))
 
-        # Calculate the true label loss
-        label_loss = ce_loss(student_logits, labels)
-        # Weighted sum of the two losses
-        loss = percent_of_teacher * soft_targets_loss + (1-percent_of_teacher) * label_loss
-
-        loss.backward()
-        optimizer.step()
-
-        running_loss += loss.item()
         torch.save(student_model.state_dict(), f"student_model_epoch_{epoch+1}.pth")
 
 # Evaluation
