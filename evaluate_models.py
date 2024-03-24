@@ -51,8 +51,8 @@ if __name__ == "__main__":
             )
         )
 
-    t_accuracy = evaluate_model(test_loader, teacher_model, device)
+    t_accuracy = evaluate_model(teacher_model, test_loader, device)
     print(f"Teacher Accuracy: {t_accuracy:.2f}%")
 
-    s_accuracy = evaluate_model(test_loader, student_model, device)
+    s_accuracy = evaluate_model(student_model, test_loader, device)
     print(f"Student Accuracy: {s_accuracy:.2f}%")
