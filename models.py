@@ -15,7 +15,7 @@ class SimpleCNN(nn.Module):
         self.fc2 = nn.Linear(512, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        print(1, type(x))
+        print(1, type(x), x.size())
         a = self.conv1(x)
         b = F.relu(a)
         x = self.pool(b)
@@ -23,7 +23,7 @@ class SimpleCNN(nn.Module):
         x = x.view(-1, 64 * 8 * 8)
         x = F.relu(self.fc1(x))
         x = self.fc2(x)
-        print(2, type(x))
+        print(2, type(x), x.size())
         return x
 
 
@@ -79,4 +79,27 @@ class AdvancedCNN(nn.Module):
         x = self.dropout1(F.relu(self.fc1(x)))
         x = self.dropout2(F.relu(self.fc2(x)))
         x = self.fc3(x)
+        return x
+class LightNN(nn.Module):
+    def __init__(self, num_classes=10):
+        super(LightNN, self).__init__()
+        self.features = nn.Sequential(
+            nn.Conv2d(3, 16, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(16, 16, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
+        self.classifier = nn.Sequential(
+            nn.Linear(1024, 256),
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.Linear(256, num_classes)
+        )
+
+    def forward(self, x):
+        x = self.features(x)
+        x = torch.flatten(x, 1)
+        x = self.classifier(x)
         return x
