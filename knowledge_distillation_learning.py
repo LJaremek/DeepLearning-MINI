@@ -102,6 +102,7 @@ for epoch in range(1, epochs+1):
         optimizer.step()
 
         running_loss += loss.item()
+        torch.save(student_model.state_dict(), f"student_model_epoch_{epoch+1}.pth")
 
 # Evaluation
 student_model.eval()
