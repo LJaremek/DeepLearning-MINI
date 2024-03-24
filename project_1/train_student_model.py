@@ -7,7 +7,7 @@ import torch.nn as nn
 from tqdm import tqdm
 import torch
 
-from models import EfficientNetB0, SimpleEfficientNetB0
+from models import EfficientNetB0, SimpleEfficientNetB0, SuperSimpleEfficientNetB0
 from tools import calc_data_mean_std, evaluate_model
 
 
@@ -44,11 +44,12 @@ classes = len(train_dataset.classes)
 
 # Model initialization
 teacher_model = EfficientNetB0(num_classes=classes).to(device)
+teacher_path = "project_1\\models_status\\10c_model_epoch_7.pth"
 teacher_model.load_state_dict(
-    torch.load('model_epoch_10.pth', map_location=device)
+    torch.load(teacher_path, map_location=device)
     )
 
-student_model = SimpleEfficientNetB0(num_classes=classes).to(device)
+student_model = SuperSimpleEfficientNetB0(num_classes=classes).to(device)
 
 # Loss and optimizer
 criterion = nn.CrossEntropyLoss()
@@ -113,7 +114,7 @@ for epoch in range(num_epochs):
         print(f"Epoch {epoch+1}/{num_epochs}, Accuracy: {accuracy:.2f}%")
         torch.save(
             student_model.state_dict(),
-            f"{classes}c_student_model_epoch_{epoch+1}.pth"
+            f"{classes}c_student_model_{student_model._get_name}_epoch_{epoch+1}.pth"
             )
 
 # Evaluation
