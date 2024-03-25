@@ -6,6 +6,7 @@ import torch
 
 from models import EfficientNetB0, SimpleEfficientNetB0
 from tools import calc_data_mean_std, evaluate_model
+import time
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -51,8 +52,19 @@ if __name__ == "__main__":
             )
         )
 
+    start = time.time()
     t_accuracy = evaluate_model(teacher_model, test_loader, device)
     print(f"Teacher Accuracy: {t_accuracy:.2f}%")
+    end = time.time()
+    teacher_time = end-start
 
+    start = time.time()
     s_accuracy = evaluate_model(student_model, test_loader, device)
     print(f"Student Accuracy: {s_accuracy:.2f}%")
+    end = time.time()
+    student_time = end-start
+
+    print("Teacher response times:", teacher_time)
+    print("Student response times:", student_time)
+    percentage = (teacher_time/student_time)*100
+    print(f"student is {percentage}% faster the teacher")
