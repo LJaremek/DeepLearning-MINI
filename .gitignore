@@ -1,0 +1,12 @@
+# main
+.vscode/
+__pycache__/
+
+# --- Project 1 ---
+
+# data
+project_1/data/test/
+!project_1/data/test/.gitkeep
+
+project_1/data/train/
+!project_1/data/train/.gitkeep
