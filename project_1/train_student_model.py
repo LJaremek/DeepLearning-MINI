@@ -111,7 +111,7 @@ for epoch in range(num_epochs):
             running_loss += loss.item()
             tepoch.set_postfix(loss=running_loss/len(train_loader))
 
-        accuracy = evaluate_model(test_loader, student_model, device)
+        accuracy = evaluate_model(student_model, test_loader, device)
         print(f"Epoch {epoch+1}/{num_epochs}, Accuracy: {accuracy:.2f}%")
         torch.save(
             student_model.state_dict(),

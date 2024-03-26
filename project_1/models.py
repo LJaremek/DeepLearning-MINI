@@ -121,7 +121,7 @@ class SuperSimpleEfficientNetB0(nn.Module):
 
 class SuperGigaSimpleEfficientNetB0(nn.Module):
     def __init__(self, num_classes=1000):
-        super(SuperSimpleEfficientNetB0, self).__init__()
+        super(SuperGigaSimpleEfficientNetB0, self).__init__()
         self.stem = nn.Sequential(
             nn.Conv2d(3, 32, kernel_size=3, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(32),
