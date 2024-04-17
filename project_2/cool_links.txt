@@ -1,0 +1,11 @@
+full data link - https://www.kaggle.com/competitions/tensorflow-speech-recognition-challenge
+
+Task done on simpler data using CNN on spectrograms there is also script for simple data download:
+https://colab.research.google.com/github/tensorflow/docs/blob/master/site/en/tutorials/audio/simple_audio.ipynb#scrollTo=dzLKpmZICaWN
+
+my own notebook with same thing but i had problems running thing above:
+https://colab.research.google.com/drive/1XDitGeWLQnKWjVxDXkg8VwMv7i3dQveG
+
+potential transformer to look to but i didn't check it out as of yet: 
+https://colab.research.google.com/github/keras-team/keras-io/blob/master/examples/audio/ipynb/transformer_asr.ipynb
+
