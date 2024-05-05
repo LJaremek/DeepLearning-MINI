@@ -1,0 +1,17 @@
+AudioTransformer
+Epoch 1, Loss: 1.0618 Test loss: 0.8564 Test acc: 67.0
+Epoch 2, Loss: 0.8511 Test loss: 0.9526 Test acc: 66.26
+
+AudioModel
+Epoch 1, Loss: 1.395 Test loss: 1.124 Test acc: 56.0
+Epoch 2, Loss: 1.0724 Test loss: 1.0893 Test acc: 54.31
+Epoch 3, Loss: 0.9897 Test loss: 0.9878 Test acc: 60.71
+Epoch 4, Loss: 0.9726 Test loss: 0.9461 Test acc: 64.15
+Epoch 5, Loss: 0.9717 Test loss: 0.9724 Test acc: 63.14
+
+ImprovedAudioModel
+Epoch 1, Loss: 1.0345 Test loss: 0.6778 Test acc: 75.57
+Epoch 2, Loss: 0.5599 Test loss: 0.4767 Test acc: 81.76
+Epoch 3, Loss: 0.3788 Test loss: 0.4384 Test acc: 84.4
+Epoch 4, Loss: 0.2879 Test loss: 0.3766 Test acc: 87.26
+Epoch 5, Loss: 0.2228 Test loss: 0.4068 Test acc: 86.52
