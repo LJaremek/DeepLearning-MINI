@@ -1,8 +1,8 @@
 # DeepLearning-MINI
-Projects from the lecture "Deep Learning" at the MINI faculty at WUT
+Project 1 from the lecture "Deep Learning" at the MINI faculty at WUT.
 
 ## 1. Project description
-
+Train student model based on trained teacher model.
 
 ## 2. Project structure
 ```
