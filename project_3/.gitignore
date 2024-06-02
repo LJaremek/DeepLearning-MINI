@@ -1,0 +1,8 @@
+# Default
+.vscode
+
+data/bedroom/
+!data\bedroom\.gitkeep
+
+model_paths/
+!model_paths/.gitkeep
