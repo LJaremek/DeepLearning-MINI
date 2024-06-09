@@ -2,7 +2,14 @@
 .vscode
 
 data/bedroom/
-!data\bedroom\.gitkeep
+!data/bedroom/.gitkeep
 
 model_paths/
 !model_paths/.gitkeep
+
+generated_images/
+!generated_images/.gitkeep
+
+data_flat_resized/
+!data_flat_resized/.gitkeep
+
